@@ -1,0 +1,52 @@
+# === ЛИЧНЫЕ КЛЮЧИ И ПАРОЛИ ===
+linuxkey
+linuxkey.pub
+
+# === СИСТЕМНЫЕ ФАЙЛЫ ===
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# === TEMP ФАЙЛЫ ===
+*.log
+*.tmp
+*.swp
+*.bak
+*.old
+*.orig
+
+# === BIN/BUILD ===
+/bin/
+/build/
+/dist/
+/out/
+
+# === IDE/EDITOR ===
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# === C/C++ ===
+*.o
+*.a
+*.so
+*.exe
+*.out
+*.obj
+*.dll
+
+# === PYTHON (если вдруг используешь) ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# === BACKUP FILES ===
+*~
+*.backup
+
+# === GIT ===
+.gitignore
+
