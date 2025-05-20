@@ -36,7 +36,7 @@ private:
     Bank& bank_;  // Ссылка на банк, с которым работаем
 
     /*
-     * Метод displayHelp()
+     * Метод displayHelp(Painter& p)
      * --------------------
      * Печатает на экран список доступных команд и краткое описание их синтаксиса.
      * Например:
@@ -49,8 +49,7 @@ private:
      *   mass_update <amount>
      *   set_limits <id> <min> <max>
      */
-    void displayHelp() const;
-
+     void displayHelp(Painter& p) const;
     /*
      * Метод processCommand()
      * -----------------------

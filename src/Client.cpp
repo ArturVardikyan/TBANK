@@ -14,33 +14,38 @@ Client::Client(Bank& bank)
     : bank_(bank)
 {}
 
-void Client::displayHelp() const {
-    cout << "Available commands:\n"
-         << "  help                         — show this help message\n"
-         << "  exit                         — exit the program\n"
-         << "  transfer <from> <to> <amt>   — transfer amt from account <from> to <to>\n"
-         << "  freeze <id>                  — freeze account <id>\n"
-         << "  unfreeze <id>                — unfreeze account <id>\n"
-         << "  mass_update <amt>            — add (or subtract) <amt> to all accounts\n"
-         << "  set_limits <id> <min> <max>  — set new [min,max] limits on account <id>\n"
-         << endl;
+void Client::displayHelp(Painter& p) const {
+    p.printColoredLine("Available commands:");
+    p.printColoredLine("  help                         — show this help message");
+    p.printColoredLine("  exit                         — exit the program");
+    p.printColoredLine("  transfer <from> <to> <amt>   — transfer amt from account <from> to <to>");
+    p.printColoredLine("  freeze <id>                  — freeze account <id>");
+    p.printColoredLine("  unfreeze <id>                — unfreeze account <id>");
+    p.printColoredLine("  mass_update <amt>            — add (or subtract) <amt> to All accounts");
+    p.printColoredLine("  set_limits <id> <min> <max>  — set new [min,max] limits on account <id>");
 }
 
 void Client::run() {
     vector<string> successPatterns = {
-        "Transferred", "OK:", "All accounts", "Limits for account"
-    };
+        "Welcome",      
+        "> ",          
+        "OK:", 
+        "Transferred",
+        "All accounts",
+        "Limits for account"
+        "Available"
+      };
     vector<string> failPatterns = {
-        "Error:", "Usage:", "Unknown command"
+        "Error", "Usage", "Unknown command"
     };
     Painter p(cout, successPatterns, failPatterns);
 
     p.printColoredLine("Welcome to TBANK client!");
-    displayHelp();
+    displayHelp(p);
 
     string line;
     while (true) {
-        p.printColoredLine("> "); 
+        p.printColoredLine("> ");
         if (!getline(cin, line)) {
             p.printColoredLine("Goodbye!");
             break;
@@ -59,7 +64,7 @@ bool Client::processCommand(const string& line, Painter& p) {
 
     try {
         if (cmd == "help") {
-            displayHelp();
+            displayHelp(p);
         }
         else if (cmd == "exit") {
             return false;
@@ -99,7 +104,7 @@ bool Client::processCommand(const string& line, Painter& p) {
                 p.printColoredLine("Usage: mass_update <amt>");
             } else {
                 bank_.massUpdate(amt);
-                p.printColoredLine("OK: all accounts updated by " + to_string(amt));
+                p.printColoredLine("OK: All accounts updated by " + to_string(amt));
             }
         }
         else if (cmd == "set_limits") {
