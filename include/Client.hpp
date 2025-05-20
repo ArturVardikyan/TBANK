@@ -4,7 +4,7 @@
 #include "Bank.hpp"      // Подключаем нашу логику работы с банком
 #include <string>        // Для std::string, в котором будем хранить ввод пользователя
 #include <iostream>      // Для std::cin, std::cout и std::cerr
-
+#include <colorprint.hpp>
 /*
  * Класс Client
  * ------------
@@ -65,7 +65,7 @@ private:
      * 3) Считать нужные аргументы (конвертировать в int или int32_t).
      * 4) Вызвать у bank_ нужный метод, обернуть вызов в try/catch для обработки ошибок.
      */
-    bool processCommand(const std::string& line);
+     bool processCommand(const std::string& line, Painter& p);
 };
 
 #endif // CLIENT_HPP
