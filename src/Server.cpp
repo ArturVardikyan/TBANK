@@ -30,7 +30,15 @@ static void* handleClientThread(void* arg) {
     int sock = ta->client_socket;
     Bank* bank = ta->bank;
     delete ta;  // удаляем аргументы сразу, чтобы освободить память
-
+    sendLine(sock, "Welcome to TBANK server!");
+    sendLine(sock, "Available commands:");
+    sendLine(sock, "  help                         - show this help message");
+    sendLine(sock, "  shutdown                     - stop the server");
+    sendLine(sock, "  transfer <from> <to> <amt>   - transfer amount between accounts");
+    sendLine(sock, "  freeze <id>                  - freeze account");
+    sendLine(sock, "  unfreeze <id>                - unfreeze account");
+    sendLine(sock, "  mass_update <amt>            - add/subtract amount to all accounts");
+    sendLine(sock, "  set_limits <id> <min> <max>  - set new limits for account");
     char buffer[1024];
     std::string line;
 
@@ -44,17 +52,26 @@ static void* handleClientThread(void* arg) {
         }
 
         try {
-            if (line == "shutdown") {
+            std::istringstream iss(line);
+            std::string cmd;
+            iss >> cmd;
+            if (cmd == "shutdown") {
                 sendLine(sock, "Server shutting down...");
                 close(sock);
                 std::exit(0);  // немедленный выход из процесса
             }
-
-            std::istringstream iss(line);
-            std::string cmd;
-            iss >> cmd;
-
-            if (cmd == "transfer") {
+            else if (cmd == "help") {
+                sendLine(sock, "Available commands:");
+                sendLine(sock, "  help                         - show this help message");
+                sendLine(sock, "  shutdown                     - stop the server");
+                sendLine(sock, "  transfer <from> <to> <amt>   - transfer amount between accounts");
+                sendLine(sock, "  freeze <id>                  - freeze account");
+                sendLine(sock, "  unfreeze <id>                - unfreeze account");
+                sendLine(sock, "  mass_update <amt>            - add/subtract to all accounts");
+                sendLine(sock, "  set_limits <id> <min> <max>  - set new limits for account");
+                continue;  // возвращаемся к чтению следующей строки
+            }
+            else if (cmd == "transfer") {
                 int from, to;
                 int32_t amt;
                 if (!(iss >> from >> to >> amt)) {
