@@ -36,6 +36,15 @@ void Bank::unfreezeAccount(int id) {
     acc.frozen = false;
 }
 
+size_t Bank::getAccountCount() const noexcept {
+    return count_;       
+}
+
+const Account& Bank::getAccount(size_t idx) const {
+    if (idx >= count_) throw std::out_of_range("Account index");
+    return accounts_[idx];
+}
+
 // Массовое обновление балансов
 int Bank::massUpdate(int32_t amount) {
     for (size_t i = 0; i < count_; ++i) {

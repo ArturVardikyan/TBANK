@@ -56,7 +56,6 @@ public:
      */
     void freezeAccount(int id);
     void unfreezeAccount(int id);
-
     /*
      * Массовое обновление балансов всех счетов.
      * Сумма может быть отрицательной (списание).
@@ -69,6 +68,10 @@ public:
      * new_min ≤ new_max и текущий баланс должен попадать в [new_min, new_max].
      */
     int setLimits(int id, int32_t new_min, int32_t new_max);
+
+    size_t getAccountCount() const noexcept;
+    
+    const Account& getAccount(size_t idx) const;
 
 private:
     Account*   accounts_;  // Внешний массив счетов (в shared‑memory или в куче)

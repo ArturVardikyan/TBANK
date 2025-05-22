@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <exception>
+#include <readline/readline.h>
+#include <readline/history.h>
 
 using namespace std;
 
@@ -45,11 +47,18 @@ void Client::run() {
 
     string line;
     while (true) {
-        p.printColoredLine("> ");
-        if (!getline(cin, line)) {
+        char* input = readline("> ");
+        if (!input) {      // EOF (Ctrl-D)
             p.printColoredLine("Goodbye!");
             break;
         }
+        std::string line(input);
+        free(input);
+
+        if (!line.empty()) {
+            add_history(line.c_str());   // сохраняем в историю
+        }
+
         if (!processCommand(line, p)) {
             p.printColoredLine("Exiting client. Goodbye!");
             break;

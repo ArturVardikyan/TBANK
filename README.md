@@ -1,129 +1,142 @@
 # TBANK: Прозрачный банк
 
-Это учебный проект на C++ (C++11) с использованием CMake, демонстрирующий две версии «Прозрачного банка»:
+Учебный проект на C++11 с CMake, демонстрирующий две версии «Прозрачного банка» и полный цикл разработки:
 
-1. **Shared Memory**: хранение данных банка в разделяемом сегменте памяти (shared memory). Утилиты:
-   - **initializer** — создаёт сегмент, инициализирует счета;
-   - **deinitializer** — удаляет сегмент;
-   - **(опционально) client** — CLI, работающий напрямую с shared memory.
-
-2. **Client-Server**: удалённое управление банком через TCP‑сокеты. Программы:
-   - **server** — многопоточный TCP‑сервер, обрабатывающий запросы клиентов;
-   - **любые TCP‑клиенты** (telnet/netcat) — можно использовать для отправки команд серверу.
+- **Shared-Memory Mode**: хранение данных банка в POSIX shared memory  
+- **Client-Server Mode**: удалённый доступ по TCP-сокетам, многопоточный сервер  
+- **CLI-клиенты**: локальный (`client`) и сетевой (`socket_client`) с цветным выводом  
+- **Статистика**: серверная нить считает и каждые 5 запросов выводит общее число  
+- **Graceful shutdown**: сервер корректно ловит `SIGINT`/`SIGTERM`  
+- **Unit-тесты**: для `Bank` и функциональные проверки  
+- **CI & Coverage**: готовый GitHub Actions и сборка с gcov/lcov  
 
 ---
 
 ## Возможности
 
-- Инициализация N счетов с указанным максимальным балансом  
-- Вывод баланса, заморозка/разморозка счёта  
-- Перевод средств между счетами  
-- Массовое обновление балансов  
-- Установка индивидуальных лимитов для счетов  
-- Удалённое управление через сокеты (Client-Server)
+- **Инициализация N счетов** с заданным `max_balance`  
+- **Баланс, заморозка/разморозка** счета  
+- **Перевод средств** между счетами  
+- **Массовое обновление** балансов  
+- **Установка лимитов** по счёту  
+- **Shared-Memory CLI** с цветным выводом (colorprint)  
+- **Multithreaded TCP-сервер** (команда `shutdown`, статистика запросов)  
+- **Socket-Client** с теми же цветными шаблонами  
+- **Graceful shutdown** по сигналам  
+- **Unit-тесты** (`test_bank`) через CTest  
+- **CI** (GitHub Actions) и **Coverage** (gcov/lcov)
 
 ---
 
 ## Требования
 
-- Linux (или UNIX-подобная ОС)  
+- ОС: Linux или UNIX-подобная  
 - CMake ≥ 3.10  
-- Компилятор с поддержкой C++11 (например, g++ из пакета `build-essential`)  
-- POSIX API (sockets, pthread)  
+- Компилятор: g++ (C++11)  
+- POSIX API: sockets, pthread  
+- Для цветного CLI: библиотека [colorprint](https://github.com/ndreyg/colorprint)  
+- Для тестов/coverage: gcov, lcov; для профили: valgrind (memcheck, helgrind)
 
 ---
 
-## Сборка проекта
+## Быстрая сборка
 
 ```bash
-# 1. Клонируем репозиторий и переходим в директорию
+# 1. Клонируем основной репозиторий и библиотеку colorprint
 git clone https://github.com/ArturVardikyan/TBANK.git
 cd TBANK
+mkdir -p lib && cd lib
+git clone https://github.com/ndreyg/colorprint.git
+cd ..
 
-# 2. Создаём папку для сборки и генерируем файлы CMake
+# 2. Сборка
 mkdir build && cd build
 cmake ..
-
-# 3. Сборка всех целей
 make
 
-После этого в папке build появятся исполняемые файлы:
+# Соберутся:
+#   bank_lib        — статическая библиотека
+#   initializer     — shared-memory инициализатор
+#   deinitializer   — shared-memory деинициализатор
+#   client          — локальный CLI с цветом
+#   socket_client   — сетевой клиент с цветом
+#   server          — multithread TCP-сервер
+#   test_bank       — unit-тесты для Bank
 
-    initializer — утилита инициализации shared memory
+Shared-Memory Mode
 
-    deinitializer — утилита удаления shared memory
-
-    server — TCP‑сервер банка
-
-    (при наличии) client — локальный CLI (необязателен)
-
-Shared Memory Mode
-
-    Инициализация (создаёт сегмент /TBANK_SHM с N счетами):
+    Инициализация сегмента
 
 ./initializer /TBANK_SHM <N> <max_balance>
 
-Работа с данными:
+Запуск локального клиента
 
-    Через локальный CLI client (если есть) или через отдельный код, мапящий /TBANK_SHM.
+./client /TBANK_SHM <N>
 
-Удаление сегмента:
+Удаление сегмента
 
-    ./deinitializer /TBANK_SHM
-
-    Примечание: Shared Memory Mode требует клиент, умеющий мапить и работать с /TBANK_SHM.
+./deinitializer /TBANK_SHM
 
 Client-Server Mode
 
-    Запуск сервера (по умолчанию порт 12345):
+    Запуск сервера
 
-./server
+./server <N> <max_balance> [port]
 
-Подключение клиента (telnet или netcat):
+— по умолчанию port=12345. После listen() сервер сразу выводит справку и статистику по 5 запросам.
 
-telnet localhost 12345
-# или
-nc localhost 12345
+Запуск цветного сетевого клиента
 
-Пример команд:
+./socket_client <host> <port>
 
-    help
-    transfer 0 1 500
-    freeze 2
-    mass_update -100
-    set_limits 3 0 10000
-    shutdown
+Тестирование и Cover­age
 
-    Завершение работы сервера:
+    Unit-тесты
 
-        Отправьте команду shutdown из клиента.
+cd build
+ctest --output-on-failure
 
-Структура проекта
+Valgrind
 
-TBANK/
-├── Bank.hpp, Bank.cpp
-├── Client.hpp, Client.cpp
-├── Server.hpp, server.cpp
-├── Initializer.hpp, Initializer.cpp
-├── Deinitializer.hpp, Deinitializer.cpp
-└── CMakeLists.txt
+valgrind --tool=memcheck ./test_bank
+valgrind --tool=helgrind ./server 5 1000
 
-    bank_lib — статическая библиотека с бизнес-логикой банка.
+Coverage
 
-    initializer/deinitializer — утилиты для shared memory.
+make coverage    # цель собирает с gcov и выводит отчет lcov/html
 
-    server — TCP‑сервер.
+CI (GitHub Actions)
 
-    (client) — локальный клиент (CLI).
+В корне есть .github/workflows/ci.yml, на каждый пуш:
 
-Внесение изменений и тестирование
+    Сборка в Release и Debug
 
-    Изменения в логике счёта — в Bank.cpp.
+    Запуск ctest
 
-    Изменения в протоколе — в server.cpp / Client.cpp.
+    Запуск Valgrind
 
-    Для повторного тестирования shared memory запускайте deinitializer перед initializer.
+    Отчет покрытия
 
+    TBANK/
+├── include/
+│   ├── Bank.hpp
+│   ├── Client.hpp
+│   ├── Server.hpp
+│   ├── Initializer.hpp
+│   └── Deinitializer.hpp
+├── src/
+│   ├── Bank.cpp
+│   ├── Client.cpp
+│   ├── Server.cpp
+│   ├── Initializer.cpp
+│   ├── Deinitializer.cpp
+│   └── SocketClient.cpp
+├── lib/
+│   └── colorprint/    # внешняя библиотека colorprint
+├── tests/
+│   └── test_bank.cpp
+├── CMakeLists.txt
+└── .github/workflows/ci.yml
 Лицензия
 
-Данный проект предоставляется без лицензии — используйте на свой страх и риск.
+Проект предоставляется без лицензии — используйте на свой страх и риск. ))))

@@ -37,6 +37,23 @@ Desktop.ini
 *.obj
 *.dll
 
+# === CMake ===
++CMakeFiles/
++CMakeCache.txt
++cmake_install.cmake
++Makefile
+
+# === Coverage/Reports ===
++coverage/
++*.gcda
++*.gcno
++*.gcov
++*.lcov
+
+# === colorprint build ===
++/lib/colorprint/*.o
++/lib/colorprint/libprintcolor.a
+
 # === PYTHON (если вдруг используешь) ===
 __pycache__/
 *.pyc
@@ -49,4 +66,3 @@ __pycache__/
 
 # === GIT ===
 .gitignore
-
