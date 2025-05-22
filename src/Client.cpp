@@ -1,14 +1,10 @@
 #include "Client.hpp"
-#include "Bank.hpp"
 
-#include <colorprint.hpp>
 #include <sstream>
-#include <iostream>
-#include <string>
-#include <vector>
+#include <iomanip>
 #include <exception>
-#include <readline/readline.h>
-#include <readline/history.h>
+#include <vector>
+#include <unistd.h>      // для isatty()
 
 using namespace std;
 
@@ -20,45 +16,43 @@ void Client::displayHelp(Painter& p) const {
     p.printColoredLine("Available commands:");
     p.printColoredLine("  help                         — show this help message");
     p.printColoredLine("  exit                         — exit the program");
-    p.printColoredLine("  transfer <from> <to> <amt>   — transfer amt from account <from> to <to>");
+    p.printColoredLine("  transfer <from> <to> <amt>   — transfer amt from <from> to <to>");
     p.printColoredLine("  freeze <id>                  — freeze account <id>");
     p.printColoredLine("  unfreeze <id>                — unfreeze account <id>");
-    p.printColoredLine("  mass_update <amt>            — add (or subtract) <amt> to All accounts");
-    p.printColoredLine("  set_limits <id> <min> <max>  — set new [min,max] limits on account <id>");
+    p.printColoredLine("  mass_update <amt>            — add/subtract <amt> to all accounts");
+    p.printColoredLine("  set_limits <id> <min> <max>  — set [min,max] limits on <id>");
+    p.printColoredLine("  show_account_list            — list all accounts in a table");
+    p.printColoredLine("  show_balance <id>            — show current balance for <id>");
+    p.printColoredLine("  show_min <id>                — show minimal limit for <id>");
+    p.printColoredLine("  show_max <id>                — show maximal limit for <id>");
 }
 
 void Client::run() {
     vector<string> successPatterns = {
-        "Welcome",      
-        "> ",          
-        "OK:", 
-        "Transferred",
-        "All accounts",
-        "Limits for account"
-        "Available"
-      };
+        "Welcome", "OK:", "Transferred",
+        "Available commands", "Account", "limits", "list"
+    };
     vector<string> failPatterns = {
-        "Error", "Usage", "Unknown command"
+        "Error:", "Usage:", "Unknown command"
     };
     Painter p(cout, successPatterns, failPatterns);
 
-    p.printColoredLine("Welcome to TBANK client!");
-    displayHelp(p);
+    // Интерактивное приветствие и справка
+    if (isatty(fileno(stdin))) {
+        p.printColoredLine("Welcome to TBANK client!");
+        displayHelp(p);
+    }
 
     string line;
+    bool interactive = isatty(fileno(stdin));
     while (true) {
-        char* input = readline("> ");
-        if (!input) {      // EOF (Ctrl-D)
+        if (interactive) {
+            p.printColoredLine("> ");
+        }
+        if (!getline(cin, line)) {
             p.printColoredLine("Goodbye!");
             break;
         }
-        std::string line(input);
-        free(input);
-
-        if (!line.empty()) {
-            add_history(line.c_str());   // сохраняем в историю
-        }
-
         if (!processCommand(line, p)) {
             p.printColoredLine("Exiting client. Goodbye!");
             break;
@@ -72,7 +66,25 @@ bool Client::processCommand(const string& line, Painter& p) {
     if (!(iss >> cmd)) return true;
 
     try {
-        if (cmd == "help") {
+        if (cmd == "show_account_list") {
+            showAccountList(p);
+        }
+        else if (cmd == "show_balance") {
+            int id;
+            if (!(iss >> id)) p.printColoredLine("Usage: show_balance <id>");
+            else showBalance(id, p);
+        }
+        else if (cmd == "show_min") {
+            int id;
+            if (!(iss >> id)) p.printColoredLine("Usage: show_min <id>");
+            else showMin(id, p);
+        }
+        else if (cmd == "show_max") {
+            int id;
+            if (!(iss >> id)) p.printColoredLine("Usage: show_max <id>");
+            else showMax(id, p);
+        }
+        else if (cmd == "help") {
             displayHelp(p);
         }
         else if (cmd == "exit") {
@@ -113,7 +125,7 @@ bool Client::processCommand(const string& line, Painter& p) {
                 p.printColoredLine("Usage: mass_update <amt>");
             } else {
                 bank_.massUpdate(amt);
-                p.printColoredLine("OK: All accounts updated by " + to_string(amt));
+                p.printColoredLine("OK: all balances updated by " + to_string(amt));
             }
         }
         else if (cmd == "set_limits") {
@@ -135,4 +147,40 @@ bool Client::processCommand(const string& line, Painter& p) {
     }
 
     return true;
+}
+
+// ------------------ реализации новых методов ------------------
+
+void Client::showAccountList(Painter& p) const {
+    p.printColoredLine(" ID |   Balance   |    Min    |    Max    | Frozen");
+    p.printColoredLine("----+-------------+-----------+-----------+--------");
+    size_t N = bank_.getAccountCount();
+    for (size_t i = 0; i < N; ++i) {
+        const Account& a = bank_.getAccount(i);
+        ostringstream oss;
+        oss << setw(3) << a.account_id << " | "
+            << setw(11) << a.balance     << " | "
+            << setw(9)  << a.min_balance << " | "
+            << setw(9)  << a.max_balance << " | "
+            << (a.frozen ? "true" : "false");
+        p.printColoredLine(oss.str());
+    }
+}
+
+void Client::showBalance(int id, Painter& p) const {
+    const Account& a = bank_.getAccount(static_cast<size_t>(id));
+    p.printColoredLine("Account " + to_string(id) +
+                       " balance: " + to_string(a.balance));
+}
+
+void Client::showMin(int id, Painter& p) const {
+    const Account& a = bank_.getAccount(static_cast<size_t>(id));
+    p.printColoredLine("Account " + to_string(id) +
+                       " min balance: " + to_string(a.min_balance));
+}
+
+void Client::showMax(int id, Painter& p) const {
+    const Account& a = bank_.getAccount(static_cast<size_t>(id));
+    p.printColoredLine("Account " + to_string(id) +
+                       " max balance: " + to_string(a.max_balance));
 }

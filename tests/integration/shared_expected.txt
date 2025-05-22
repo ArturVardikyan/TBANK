@@ -1,0 +1,15 @@
+ ID |   Balance   |    Min    |    Max    | Frozen
+----+-------------+-----------+-----------+--------
+  0 |           0 |         0 |      1000 | false
+  1 |           0 |         0 |      1000 | false
+  2 |           0 |         0 |      1000 | false
+Error: transferFunds: insufficient funds on source account
+Account 0 balance: 0
+Account 1 balance: 0
+Error: massUpdate: balance would violate limits
+ ID |   Balance   |    Min    |    Max    | Frozen
+----+-------------+-----------+-----------+--------
+  0 |           0 |         0 |      1000 | false
+  1 |           0 |         0 |      1000 | false
+  2 |           0 |         0 |      1000 | false
+Exiting client. Goodbye!

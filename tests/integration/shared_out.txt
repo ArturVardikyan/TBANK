@@ -1,0 +1,15 @@
+ ID |   Balance   |    Min    |    Max    | Frozen
+----+-------------+-----------+-----------+--------
+  [33m0[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+  [33m1[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+  [33m2[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+[31mError:[0m transferFunds: insufficient funds on source account
+[32mAccount[0m [33m0[0m balance: [33m0[0m
+[32mAccount[0m [33m1[0m balance: [33m0[0m
+[31mError:[0m massUpdate: balance would violate [32mlimits[0m
+ ID |   Balance   |    Min    |    Max    | Frozen
+----+-------------+-----------+-----------+--------
+  [33m0[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+  [33m1[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+  [33m2[0m |           [33m0[0m |         [33m0[0m |      [33m1000[0m | false
+Exiting client. Goodbye!

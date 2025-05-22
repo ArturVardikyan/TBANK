@@ -13,8 +13,7 @@
 #include <sstream>      // std::istringstream
 #include <utility>      // std::pair
 #include <string>       // std::string
-#include <iomanip>    // for std::setw
-#include <sstream>    // for std::ostringstream
+#include <iomanip>      // for std::setw
 // Глобальные переменные для shutdown и статистики
 static int listen_fd = -1;
 static std::atomic<bool> shutdownFlag(false);
@@ -76,7 +75,10 @@ static void *handleClient(void *arg)
     sendLine(sock, "  unfreeze <id>                - unfreeze account");
     sendLine(sock, "  mass_update <amt>            - mass update balances");
     sendLine(sock, "  set_limits <id> <min> <max>  - set account limits");
-    sendLine(sock, "  show_account_list            - showing accounts list");
+    sendLine(sock, "  show_account_list            - showing min list");
+    sendLine(sock, "  show_min <id>                - showing min balance for account <id>");
+    sendLine(sock, "  show_max <id>                - showing max balance for account <id>");
+    sendLine(sock, "  show_balance <id>            - showing balance for account <id>");
 
     while (true)
     {
@@ -128,6 +130,9 @@ static void *handleClient(void *arg)
                 sendLine(sock, "  mass_update <amt>            - mass update balances");
                 sendLine(sock, "  set_limits <id> <min> <max>  - set account limits");
                 sendLine(sock, "  show_account_list            - showing accounts list");
+                sendLine(sock, "  show_min <id>                - showing min balance for account <id>");
+                sendLine(sock, "  show_max <id>                - showing max balance for account <id>");
+                sendLine(sock, "  show_balance <id>            - showing balance for account <id>");
             }
             else if (cmd == "transfer")
             {
@@ -196,19 +201,67 @@ static void *handleClient(void *arg)
                     sendLine(sock, "OK: limits set for account " + std::to_string(id));
                 }
             }
-            else if (cmd == "show_account_list") {
+            else if (cmd == "show_account_list")
+            {
                 sendLine(sock, " ID |   Balance   |    Min    |    Max    | Frozen");
                 sendLine(sock, "----+-------------+-----------+-----------+--------");
                 size_t N = bank->getAccountCount();
-                for (size_t i = 0; i < N; ++i) {
-                    const Account& a = bank->getAccount(i);
+                for (size_t i = 0; i < N; ++i)
+                {
+                    const Account &a = bank->getAccount(i);
                     std::ostringstream oss;
                     oss << std::setw(3) << a.account_id << " | "
-                        << std::setw(11) << a.balance     << " | "
-                        << std::setw(9)  << a.min_balance << " | "
-                        << std::setw(9)  << a.max_balance << " | "
+                        << std::setw(11) << a.balance << " | "
+                        << std::setw(9) << a.min_balance << " | "
+                        << std::setw(9) << a.max_balance << " | "
                         << (a.frozen ? "true" : "false");
                     sendLine(sock, oss.str());
+                }
+            }
+            else if (cmd == "show_balance")
+            {
+                int id;
+                if (!(iss >> id))
+                {
+                    sendLine(sock, "Usage: show_balance <id>");
+                }
+                else
+                {
+                    // получаем ссылку на нужный аккаунт
+                    const Account &a = bank->getAccount(static_cast<size_t>(id));
+                    sendLine(sock,
+                             "Account " + std::to_string(id) +
+                                 " balance: " + std::to_string(a.balance));
+                }
+            }
+            else if (cmd == "show_min")
+            {
+                int id;
+                if (!(iss >> id))
+                {
+                    sendLine(sock, "Usage: show_min <id>");
+                }
+                else
+                {
+                    const Account &a = bank->getAccount(static_cast<size_t>(id));
+                    sendLine(sock,
+                             "Account " + std::to_string(id) +
+                                 " min balance: " + std::to_string(a.min_balance));
+                }
+            }
+            else if (cmd == "show_max")
+            {
+                int id;
+                if (!(iss >> id))
+                {
+                    sendLine(sock, "Usage: show_max <id>");
+                }
+                else
+                {
+                    const Account &a = bank->getAccount(static_cast<size_t>(id));
+                    sendLine(sock,
+                             "Account " + std::to_string(id) +
+                                 " max balance: " + std::to_string(a.max_balance));
                 }
             }
             else

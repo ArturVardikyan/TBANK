@@ -65,8 +65,7 @@ target_include_directories(client
 target_link_libraries(client
     PRIVATE
         bank_lib
-        colorprint
-        readline            # <-- сюда
+        colorprint     # теперь мы линкуем созданную выше цель
 )
 
 # -------------------------------------------------------------------

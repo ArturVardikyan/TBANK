@@ -1,0 +1,22 @@
+Available commands:
+  help
+  shutdown
+  transfer <from> <to> <amt>
+  freeze <id>
+  unfreeze <id>
+  mass_update <amt>
+  set_limits <id> <min> <max>
+  show_account_list
+  show_balance <id>
+  show_min <id>
+  show_max <id>
+OK: transferred 200
+Account 0 balance:  -200
+Account 1 balance:  200
+OK: account 2 frozen
+ ID |   Balance   |    Min    |    Max    | Frozen
+----+-------------+-----------+-----------+--------
+  0 |        -200 |         0 |      1000 | false
+  1 |         200 |         0 |      1000 | false
+  2 |           0 |         0 |      1000 | true
+Server shutting down...
