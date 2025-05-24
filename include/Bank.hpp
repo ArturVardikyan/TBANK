@@ -1,27 +1,29 @@
 #ifndef BANK_HPP
 #define BANK_HPP
 
-#include <cstdint>    // для int32_t
-#include <cstddef>    // для size_t
-#include <stdexcept>  // для исключений
+#include <cstdint>   // для int32_t
+#include <cstddef>   // для size_t
+#include <stdexcept> // для исключений
 
 // Описание счёта
-struct Account {
-    int        account_id;   // Уникальный ID счёта
-    int32_t    balance;      // Текущий баланс
-    int32_t    min_balance;  // Минимальный баланс
-    int32_t    max_balance;  // Максимальный баланс
-    bool       frozen;       // true — заморожен, false — активен
+struct Account
+{
+    int account_id;      // Уникальный ID счёта
+    int32_t balance;     // Текущий баланс
+    int32_t min_balance; // Минимальный баланс
+    int32_t max_balance; // Максимальный баланс
+    bool frozen;         // true — заморожен, false — активен
 };
 
 /*
  * Класс Bank
  * -----------
- * Инкапсулирует логику работы с массивом счетов, 
+ * Инкапсулирует логику работы с массивом счетов,
  * не владеет памятью сам по себе (не вызывает delete[]),
  * а лишь оперирует внешним массивом Account*.
  */
-class Bank {
+class Bank
+{
 public:
     /*
      * Конструктор
@@ -31,17 +33,18 @@ public:
      * Никакой аллокации здесь не происходит: класс просто запоминает,
      * где лежат счета, и сколько их.
      */
-    Bank(Account* accounts_ptr, size_t count)
+    Bank(Account *accounts_ptr, size_t count)
         : accounts_(accounts_ptr), count_(count)
     {
-        if (!accounts_ || count_ == 0) {
+        if (!accounts_ || count_ == 0)
+        {
             throw std::invalid_argument("Bank: invalid accounts pointer or count");
         }
     }
 
     // Запрещаем копирование, чтобы случайно не получить два объекта, ссылающихся на один массив
-    Bank(const Bank&) = delete;
-    Bank& operator=(const Bank&) = delete;
+    Bank(const Bank &) = delete;
+    Bank &operator=(const Bank &) = delete;
 
     /*
      * Перевод средств
@@ -67,20 +70,24 @@ public:
      * Установить новые лимиты для заданного ID.
      * new_min ≤ new_max и текущий баланс должен попадать в [new_min, new_max].
      */
-    int setLimits(int id, int32_t new_min, int32_t new_max);
+    // устанавливает новые границы, бросает std::runtime_error, если newMin > newMax
+    void setLimits(size_t accountId, int32_t newMin, int32_t newMax);
 
     size_t getAccountCount() const noexcept;
-    
-    const Account& getAccount(size_t idx) const;
+
+    const Account &getAccount(size_t idx) const;
 
 private:
-    Account*   accounts_;  // Внешний массив счетов (в shared‑memory или в куче)
-    size_t     count_;     // Число счетов
+    Account *accounts_; // Внешний массив счетов (в shared‑memory или в куче)
+    size_t count_;      // Число счетов
 
     // Вспомогательная функция — найти счёт по ID. Если не находятся, бросить исключение.
-    Account& findAccount(int id) {
-        for (size_t i = 0; i < count_; ++i) {
-            if (accounts_[i].account_id == id) {
+    Account &findAccount(int id)
+    {
+        for (size_t i = 0; i < count_; ++i)
+        {
+            if (accounts_[i].account_id == id)
+            {
                 return accounts_[i];
             }
         }

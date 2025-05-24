@@ -14,10 +14,11 @@
 #include <utility>      // std::pair
 #include <string>       // std::string
 #include <iomanip>      // for std::setw
+#include <mutex>
 // Глобальные переменные для shutdown и статистики
-static int listen_fd = -1;
+static std::atomic<int> listen_fd{-1};
 static std::atomic<bool> shutdownFlag(false);
-
+static std::mutex cout_mutex;
 static pthread_mutex_t stats_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t stats_cond = PTHREAD_COND_INITIALIZER;
 static size_t request_count = 0;
