@@ -15,7 +15,7 @@
 #include <string>       // std::string
 #include <iomanip>      // for std::setw
 #include <mutex>
-// Глобальные переменные для shutdown и статистики
+
 static std::atomic<int> listen_fd{-1};
 static std::atomic<bool> shutdownFlag(false);
 static std::mutex cout_mutex;
@@ -23,7 +23,6 @@ static pthread_mutex_t stats_mutex = PTHREAD_MUTEX_INITIALIZER;
 static pthread_cond_t stats_cond = PTHREAD_COND_INITIALIZER;
 static size_t request_count = 0;
 
-// Обработчик сигналов для graceful shutdown
 static void handleSignal(int /*sig*/)
 {
     shutdownFlag.store(true);
@@ -34,7 +33,6 @@ static void handleSignal(int /*sig*/)
     }
 }
 
-// Статистический поток: ждёт сигнала каждый запрос и печатает каждые 5
 static void *statsThread(void * /*arg*/)
 {
     pthread_mutex_lock(&stats_mutex);
@@ -46,18 +44,15 @@ static void *statsThread(void * /*arg*/)
             std::cout << "[Stats] Processed " << request_count << " requests\n";
         }
     }
-    // никогда не доходит до pthread_mutex_unlock
     return nullptr;
 }
 
-// Отправка строки с '\n' клиенту
 static void sendLine(int sock, const std::string &line)
 {
     std::string msg = line + "\n";
     send(sock, msg.c_str(), msg.size(), 0);
 }
 
-// Поток-работник для клиента
 static void *handleClient(void *arg)
 {
     auto *args = static_cast<std::pair<int, Bank *> *>(arg);
@@ -91,7 +86,6 @@ static void *handleClient(void *arg)
         if (!line.empty() && (line.back() == '\r' || line.back() == '\n'))
             line.pop_back();
 
-        // Увеличиваем счётчик и сигналим статистике
         pthread_mutex_lock(&stats_mutex);
         ++request_count;
         pthread_cond_signal(&stats_cond);
@@ -228,7 +222,6 @@ static void *handleClient(void *arg)
                 }
                 else
                 {
-                    // получаем ссылку на нужный аккаунт
                     const Account &a = bank->getAccount(static_cast<size_t>(id));
                     sendLine(sock,
                              "Account " + std::to_string(id) +
@@ -282,11 +275,9 @@ static void *handleClient(void *arg)
 
 int startServer(int port, Bank &bank)
 {
-    // Настраиваем signal handlers
     std::signal(SIGINT, handleSignal);
     std::signal(SIGTERM, handleSignal);
 
-    // Создаём слушающий сокет
     listen_fd = socket(AF_INET, SOCK_STREAM, 0);
     if (listen_fd < 0)
     {
@@ -314,12 +305,10 @@ int startServer(int port, Bank &bank)
 
     std::cout << "Server listening on port " << port << "...\n";
 
-    // Запускаем stats-поток
     pthread_t stats_tid;
     pthread_create(&stats_tid, nullptr, statsThread, nullptr);
     pthread_detach(stats_tid);
 
-    // Основной цикл accept()
     while (!shutdownFlag.load())
     {
         sockaddr_in client_addr{};
@@ -350,12 +339,10 @@ int startServer(int port, Bank &bank)
 }
 int main(int argc, char **argv)
 {
-    // Параметры по умолчанию
-    size_t N = 100;               // число счетов
-    int32_t max_balance = 100000; // максимальный баланс
-    int port = DEFAULT_PORT;      // порт из Server.hpp
+    size_t N = 100;               
+    int32_t max_balance = 100000; 
+    int port = DEFAULT_PORT;     
 
-    // Можно разобрать argc/argv, чтобы задать N, max_balance и порт из командной строки
     if (argc >= 2)
     {
         N = static_cast<size_t>(std::stoul(argv[1]));
@@ -369,7 +356,6 @@ int main(int argc, char **argv)
         port = std::stoi(argv[3]);
     }
 
-    // Инициализируем массив счетов
     Account *accounts = new Account[N];
     for (size_t i = 0; i < N; ++i)
     {

@@ -1,6 +1,5 @@
 #include "Bank.hpp"
 
-// Перевод средств между двумя ID
 int Bank::transferFunds(int from_id, int to_id, int32_t amount)
 {
     if (amount <= 0)
@@ -29,14 +28,12 @@ int Bank::transferFunds(int from_id, int to_id, int32_t amount)
     return 0;
 }
 
-// Заморозить счёт
 void Bank::freezeAccount(int id)
 {
     Account &acc = findAccount(id);
     acc.frozen = true;
 }
 
-// Разморозить счёт
 void Bank::unfreezeAccount(int id)
 {
     Account &acc = findAccount(id);
@@ -55,7 +52,6 @@ const Account &Bank::getAccount(size_t idx) const
     return accounts_[idx];
 }
 
-// Массовое обновление балансов
 int Bank::massUpdate(int32_t amount)
 {
     for (size_t i = 0; i < count_; ++i)
@@ -70,7 +66,6 @@ int Bank::massUpdate(int32_t amount)
     return 0;
 }
 
-// Установка лимитов для одного счёта
 void Bank::setLimits(size_t id, int32_t newMin, int32_t newMax) {
     if (newMin > newMax) {
         throw std::runtime_error(

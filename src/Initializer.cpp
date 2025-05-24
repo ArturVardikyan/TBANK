@@ -1,4 +1,3 @@
-// Initializer.hpp
 #ifndef INITIALIZER_HPP
 #define INITIALIZER_HPP
 
@@ -17,10 +16,9 @@
  */
 Bank* initializeBankShared(const std::string& shm_name, size_t N, int32_t max_balance);
 
-#endif // INITIALIZER_HPP
+#endif 
 
 
-// Initializer.cpp
 #include "Initializer.hpp"
 #include <sys/mman.h>
 #include <fcntl.h>
@@ -29,21 +27,17 @@ Bank* initializeBankShared(const std::string& shm_name, size_t N, int32_t max_ba
 #include <iostream>
 
 Bank* initializeBankShared(const std::string& shm_name, size_t N, int32_t max_balance) {
-    // Открываем или создаём сегмент shared memory
     int shm_fd = shm_open(shm_name.c_str(), O_CREAT | O_RDWR, 0666);
     if (shm_fd < 0) { perror("shm_open"); return nullptr; }
 
-    // Устанавливаем размер сегмента
     if (ftruncate(shm_fd, N * sizeof(Account)) < 0) {
         perror("ftruncate"); close(shm_fd); return nullptr;
     }
 
-    // Мапим в память
     void* ptr = mmap(nullptr, N * sizeof(Account), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
-    close(shm_fd); // дескриптор больше не нужен
+    close(shm_fd); 
     if (ptr == MAP_FAILED) { perror("mmap"); return nullptr; }
 
-    // Инициализируем массив Account
     Account* accounts = static_cast<Account*>(ptr);
     for (size_t i = 0; i < N; ++i) {
         accounts[i].account_id = static_cast<int>(i);
@@ -53,7 +47,6 @@ Bank* initializeBankShared(const std::string& shm_name, size_t N, int32_t max_ba
         accounts[i].frozen     = false;
     }
 
-    // Конструируем Bank, он лишь хранит указатель на accounts и их число
     return new Bank(accounts, N);
 }
 
@@ -72,6 +65,5 @@ int main(int argc, char** argv) {
         return 1;
     }
     std::cout << "Bank initialized in shared memory: " << shm_name << "\n";
-    // При необходимости держим процесс живым
     return 0;
 }

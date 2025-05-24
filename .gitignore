@@ -25,8 +25,6 @@ Desktop.ini
 # === IDE/EDITOR ===
 .vscode/
 .idea/
-*.sublime-workspace
-*.sublime-project
 
 # === C/C++ ===
 *.o
@@ -53,12 +51,6 @@ Desktop.ini
 # === colorprint build ===
 +/lib/colorprint/*.o
 +/lib/colorprint/libprintcolor.a
-
-# === PYTHON (если вдруг используешь) ===
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
 
 # === BACKUP FILES ===
 *~

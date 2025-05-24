@@ -26,7 +26,7 @@ private:
     // Обрабатывает одну введённую строку. Возвращает false, чтобы выйти.
     bool processCommand(const std::string& line, Painter& p);
 
-    // Новые команды:
+    //команды:
     void showAccountList(Painter& p) const;
     void showBalance(int id, Painter& p) const;
     void showMin(int id, Painter& p) const;

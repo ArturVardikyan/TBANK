@@ -4,7 +4,7 @@
 #include <iomanip>
 #include <exception>
 #include <vector>
-#include <unistd.h>      // для isatty()
+#include <unistd.h>
 
 using namespace std;
 
@@ -37,7 +37,6 @@ void Client::run() {
     };
     Painter p(cout, successPatterns, failPatterns);
 
-    // Интерактивное приветствие и справка
     if (isatty(fileno(stdin))) {
         p.printColoredLine("Welcome to TBANK client!");
         displayHelp(p);
@@ -148,8 +147,6 @@ bool Client::processCommand(const string& line, Painter& p) {
 
     return true;
 }
-
-// ------------------ реализации новых методов ------------------
 
 void Client::showAccountList(Painter& p) const {
     p.printColoredLine(" ID |   Balance   |    Min    |    Max    | Frozen");
